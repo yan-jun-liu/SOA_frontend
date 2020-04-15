@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Stream files from mediafire to sendspace</title>
+  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+</head>
+
+<body>
+  <form action="http://localhost:8081/login" id="user_form">
+    <label>Email</label><input name="email" type="text" value="" />
+    <label>Password</label><input name="password" type="text" value="" />
+    <input type="submit" value="submit" />
+  </form>
+
+  <script>
+    // Attach a submit handler to the form
+    $("#user_form").submit(function (event) {
+      // Stop form from submitting normally
+      event.preventDefault();
+
+      // Get some values from elements on the page:
+      var $form = $(this),
+        email = $form.find("input[name='email']").val(),
+        password = $form.find("input[name='password']").val(),
+        url = $form.attr("action");
+
+      $(document).ajaxError(function (e, x, settings, exception) {
+        alert("Status:" + x.status + "," + exception)
+      });
+
+      const request = JSON.stringify({ "Email": email, "Password": password });
+      $.post(url, request, function (data, status) {
+        console.log(data.Status);
+        console.log(data.Message);
+        data.UploadSucceeded.forEach(item => console.log("Uploaded:"+item));
+        data.UploadFailed.forEach(item => console.log("Failed:"+item));
+        var uploaded = "Uploaded files:" ;
+        data.UploadSucceeded.forEach(item => uploaded += item + "<br>");
+        var failed = "Fail to upload files:";
+        data.UploadFailed.forEach(item => failed+= item+ "<br>");
+        document.getElementById("response").innerHTML =
+          "Status: " + data.Status + "<br>" +
+          "Message: " + data.Message + "<br>"+
+          uploaded+failed;
+      });
+    });
+  </script>
+
+  <!-- the result of the search will be rendered inside this div -->
+  <div id="response"></div>
+
+</body>
+
+</html>
